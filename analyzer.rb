@@ -1,31 +1,34 @@
 require 'pp'
 require './source'
+require './game'
 
-def winrate(games)
-  (wins(games).to_f * 100 / (wins(games).to_f + losses(games).to_f)).round(2)
+MY_NAME = 'Alephnaut'
+
+def winrate(name, games)
+  (wins(name, games).to_f * 100 / (wins(name, games).to_f + losses(name, games).to_f)).round(2)
 end
 
-def wins(games)
-  games.count { |game| game['Result'] === 'W' }
+def wins(name, games)
+  games.count { |game| game.winner == name }
 end
 
-def losses(games)
-  games.count { |game| game['Result'] === 'L' }
+def losses(name, games)
+  games.count { |game| game.winner != name }
 end
 
-def mmr_bracket(game)
-  difference = game['My MMR'].to_i - game['Their MMR'].to_i
+def mmr_bracket(name, game)
+  difference = game.p1_mmr.to_i - game.p2_mmr.to_i
 
   if difference > -50 && difference < 50
-    return '3 close             '
+    return 'close                '
   elsif difference >= 200
-    return '1 strongly favored  '
+    return 'p1 strongly favored  '
   elsif difference <= -200
-    return '5 strongly unfavored'
+    return 'p2 strongly unfavored'
   elsif difference > 0
-    return '2 weakly favored    '
+    return 'p1 weakly favored    '
   else
-    return '4 weakly unfavored  '
+    return 'p2 weakly unfavored  '
   end
 end
 
@@ -33,7 +36,7 @@ source = GoogleSheets.new
 
 PP.pp( 
   source.games
-    .group_by { |game| "#{game['Race']} (#{mmr_bracket(game)})" }
+    .group_by { |game| "#{game.p2_race} (#{mmr_bracket(MY_NAME, game)})" }
     .sort
-    .map { |key, games| [ key, { wins: wins(games), losses: losses(games), winrate: "#{winrate(games)}%"} ] }.to_h
+    .map { |key, games| [ key, { wins: wins(MY_NAME, games), losses: losses(MY_NAME, games), winrate: "#{winrate(MY_NAME, games)}%"} ] }.to_h
 )

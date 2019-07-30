@@ -2,6 +2,7 @@ require 'google/apis/sheets_v4'
 require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'fileutils'
+require './game'
 
 class Source
   def games
@@ -20,7 +21,7 @@ class GoogleSheets < Source
   SPREADSHEET_ID = '1eMzmb8dHxtmCVfBDilVIuAqs9_NGBZJ7vPw-lv60PB0'
 
   def games
-    with_headers(raw_data).map(&:to_h)
+    game_hashes.map { |game_hash| game_from(game_hash) }
   end
 
   private
@@ -63,5 +64,28 @@ class GoogleSheets < Source
     rows.map do |row|
       headers.zip(row)
     end
+  end
+
+  def game_hashes
+    with_headers(raw_data).map(&:to_h)
+  end
+
+  def game_from(game_hash)
+    my_name = 'Alephnaut'
+    their_name = game_hash['Name']
+    my_race = 'T'
+    their_race = game_hash['Race']
+    my_mmr = game_hash['My MMR']
+    their_mmr = game_hash['Their MMR']
+
+    Game.new(
+      winner: game_hash['Result'] == 'W' ? my_name : their_name,
+      p1_name: my_name,
+      p2_name: their_name,
+      p1_race: my_race,
+      p2_race: their_race,
+      p1_mmr: my_mmr,
+      p2_mmr: their_mmr,
+    )
   end
 end
