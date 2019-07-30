@@ -10,6 +10,14 @@ class Source
   end
 end
 
+class Replays
+  def games
+  end
+
+  private
+  
+end
+
 class GoogleSheets < Source
   OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'.freeze
   APPLICATION_NAME = 'SC2 Analyzer'.freeze
