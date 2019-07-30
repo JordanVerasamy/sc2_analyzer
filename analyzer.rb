@@ -1,42 +1,38 @@
+MY_NAME = 'Alephnaut'
+
 require 'pp'
 require './source'
 require './game'
 
-MY_NAME = 'Alephnaut'
+class Analyzer
+  attr_accessor :name, :games
 
-def winrate(name, games)
-  (wins(name, games).to_f * 100 / (wins(name, games).to_f + losses(name, games).to_f)).round(2)
-end
+  def initialize(name:,games:)
+    @name = name
+    @games = games
+  end
 
-def wins(name, games)
-  games.count { |game| game.winner == name }
-end
+  def bracketed_winrates
+    games
+      .group_by { |game| "#{game.p2_race} (#{game.mmr_bracket})" }
+      .sort
+      .map { |key, games| [ key, { wins: wins(games), losses: losses(games), winrate: "#{winrate(games)}%"} ] }.to_h
+  end
 
-def losses(name, games)
-  games.count { |game| game.winner != name }
-end
+  def winrate(games)
+    (wins(games).to_f * 100 / (wins(games).to_f + losses(games).to_f)).round(2)
+  end
 
-def mmr_bracket(name, game)
-  difference = game.p1_mmr.to_i - game.p2_mmr.to_i
+  def wins(games)
+    games.count { |game| game.winner == name }
+  end
 
-  if difference > -50 && difference < 50
-    return 'close                '
-  elsif difference >= 200
-    return 'p1 strongly favored  '
-  elsif difference <= -200
-    return 'p2 strongly unfavored'
-  elsif difference > 0
-    return 'p1 weakly favored    '
-  else
-    return 'p2 weakly unfavored  '
+  def losses(games)
+    games.count { |game| game.winner != name }
   end
 end
 
 source = GoogleSheets.new
+analyzer = Analyzer.new(name: MY_NAME, games: source.games)
 
-PP.pp( 
-  source.games
-    .group_by { |game| "#{game.p2_race} (#{mmr_bracket(MY_NAME, game)})" }
-    .sort
-    .map { |key, games| [ key, { wins: wins(MY_NAME, games), losses: losses(MY_NAME, games), winrate: "#{winrate(MY_NAME, games)}%"} ] }.to_h
-)
+PP.pp(analyzer.bracketed_winrates)

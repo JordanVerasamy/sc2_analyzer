@@ -71,12 +71,12 @@ class GoogleSheets < Source
   end
 
   def game_from(game_hash)
-    my_name = 'Alephnaut'
+    my_name = MY_NAME
     their_name = game_hash['Name']
     my_race = 'T'
     their_race = game_hash['Race']
-    my_mmr = game_hash['My MMR']
-    their_mmr = game_hash['Their MMR']
+    my_mmr = game_hash['My MMR'].to_i
+    their_mmr = game_hash['Their MMR'].to_i
 
     Game.new(
       winner: game_hash['Result'] == 'W' ? my_name : their_name,
