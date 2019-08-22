@@ -1,7 +1,9 @@
-MY_NAME = 'Alephnaut'
+MY_NAMES = ['Alephnaut', 'Lethologica']
 
 require 'pp'
 require './source'
+require './replays'
+require './google_sheets'
 require './game'
 
 class Analyzer
@@ -32,7 +34,10 @@ class Analyzer
   end
 end
 
-source = GoogleSheets.new
-analyzer = Analyzer.new(name: MY_NAME, games: source.games)
+# source = GoogleSheets.new
+source = Replays.new
+# analyzer = Analyzer.new(name: MY_NAME, games: source.games)
 
-PP.pp(analyzer.bracketed_winrates)
+# PP.pp(analyzer.bracketed_winrates)
+
+PP.pp source.games
