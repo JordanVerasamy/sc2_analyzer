@@ -26,25 +26,31 @@ class Replays
   end
 
   def my_index(game_data)
-    i_am_p1 = MY_NAMES.include? game_data[0]['Players'][0]
-    i_am_p2 = MY_NAMES.include? game_data[0]['Players'][1]
+    i_am_p1 = MY_NAMES.include? names_from(game_data)[0]
+    i_am_p2 = MY_NAMES.include? names_from(game_data)[1]
 
     i_am_p1 ? 0 : 1
   end
 
-  def xor(i)
-    return 1 if i==0
-    return 0
+  def names_from(game_data)
+    [
+      Nokogiri::HTML.parse(game_data[1]['m_playerList'][0]['m_name']).text,
+      Nokogiri::HTML.parse(game_data[1]['m_playerList'][1]['m_name']).text
+    ]
+  end
+
+  def not_(i)
+    i ^ 1
   end
 
   def game_from(game_data)
     my_index = my_index(game_data)
 
     p1 = game_data[0]['Players'][my_index] #should be me
-    p2 = game_data[0]['Players'][xor(my_index)] #should be opponent
+    p2 = game_data[0]['Players'][not_(my_index)] #should be opponent
 
-    p1_name = Nokogiri::HTML.parse(game_data[1]['m_playerList'][my_index]['m_name']).text
-    p2_name = Nokogiri::HTML.parse(game_data[1]['m_playerList'][xor(my_index)]['m_name']).text
+    p1_name = names_from(game_data)[my_index]
+    p2_name = names_from(game_data)[not_(my_index)]
 
     Game.new(
       winner: p1['Result'] == 'Win' ? p1_name : p2_name,

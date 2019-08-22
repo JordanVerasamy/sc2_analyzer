@@ -1,4 +1,4 @@
-MY_NAMES = ['Alephnaut', 'Lethologica']
+MY_NAMES = ['<aivNA>Alephnaut', '<ScSwrm>Lethologica']
 
 require 'pp'
 require './source'
